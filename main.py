@@ -13,7 +13,7 @@ class Main(object):
         if x == 'q':
             exit()
         elif x == str('1'):
-            print('scoreboard')
+            Game.retrieve_scores()
             Main.show_menu(self)
             Main.player_input(self)
         elif x == str('3'):

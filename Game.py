@@ -9,6 +9,9 @@ from itertools import permutations
 import json
 
 
+
+
+
 class Game:
     def __init__(self,human_name):
         self.valid_words = []
@@ -99,6 +102,16 @@ class Game:
                 print(self.human_1.score)
 
         self.save_scores()
+
+    @classmethod
+    def retrieve_scores(cls):
+        with open("scores.json", 'r') as outf:
+            data = json.load(outf)
+            for game in data:
+                print(game)
+                print(data[game])
+
+
 
 
 
