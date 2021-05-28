@@ -17,7 +17,7 @@ class Main(object):
             Main.show_menu(self)
             Main.player_input(self)
         elif x == str('3'):
-            paixnidi = Game('human')
+            paixnidi = Game('human','min')
             paixnidi.run()
         else:
             print('Wrong Input! Try again!')

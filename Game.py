@@ -1,23 +1,37 @@
 from copy import copy
 from os.path import exists
 from time import strftime
+from Player import Player
 
-from Computer import Computer
 from Human import Human
 from SakClass import SakClass
 from itertools import permutations
 import json
 
 
+class Computer(Player) :
+    def __init__(self,name,mode):
+        super(Computer,self).__init__(name)
+        self.mode = mode
 
-
+    def play(self,valid_words):
+        if self.mode == 'min':
+            for i in range(2, 7):
+                perms=list(map("".join, permutations(self.hand,i)))
+                for perm in perms:
+                    for valid in valid_words:
+                        if perm.strip() == valid.strip():
+                            return perm
+        return "none"
 
 class Game:
-    def __init__(self,human_name):
-        self.valid_words = []
+    valid_words = []
+
+    def __init__(self,human_name,mode):
         self.human_name = human_name
         self.human_1 = None
         self.com_1 = None
+        self.mode = mode
         self.sak = SakClass()
         self.setup()
 
@@ -29,7 +43,7 @@ class Game:
             self.valid_words = f.readlines()
     def make_players(self):
         self.human_1 = Human(self.human_name)
-        self.com_1 = Computer('Computer')
+        self.com_1 = Computer('Computer',self.mode)
 
     def setup(self):
         self.make_valid_word_list()
@@ -91,16 +105,25 @@ class Game:
     def run(self):
         answer = None
         while answer != 'q' :
-            print(repr(self.sak))
-
             self.sak.getletters(7-len(self.human_1.hand), self.human_1)
+            print(repr(self.sak))
             self.show_available_letters(self.human_1)
             answer = self.human_1.play()
+
             self.player_pass(self.human_1, answer)
             if self.check_given_answer(self.human_1, answer):
                 self.human_1.add_score(self.count_answer_points(answer))
                 print(self.human_1.score)
-
+            self.sak.getletters(7-len(self.com_1.hand),self.com_1)
+            print(repr(self.sak))
+            self.show_available_letters(self.com_1)
+            answer_com = self.com_1.play(self.valid_words)
+            if answer_com == "none":
+                self.player_pass(self.com_1, 'p')
+                print(self.com_1.name+" passed !")
+            else:
+                self.com_1.add_score(self.count_answer_points(answer_com))
+                print(self.com_1.name+" answered "+answer_com+ " and has "+ str(self.com_1.score)+"pts")
         self.save_scores()
 
     @classmethod
