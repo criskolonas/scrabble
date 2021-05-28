@@ -22,10 +22,31 @@ class Computer(Player) :
                     for valid in valid_words:
                         if perm.strip() == valid.strip():
                             return perm
+        if self.mode == 'max':
+            for i in range(7, 2):
+                perms=list(map("".join, permutations(self.hand,i)))
+                for perm in perms:
+                    for valid in valid_words:
+                        if perm.strip() == valid.strip():
+                            return perm
+        if self.mode == 'smart':
+            max_pts=0
+            best_word= None
+            perms = list(map("".join, permutations(self.hand, i)))
+            for perm in perms:
+                pts = Game.count_answer_points(perm)
+                if pts > max:
+                    max = pts
+                    best_word = perm
+
         return "none"
+
+
 
 class Game:
     valid_words = []
+
+
 
     def __init__(self,human_name,mode):
         self.human_name = human_name
@@ -91,11 +112,7 @@ class Game:
                         return True
         return False
 
-    def count_answer_points(self,answer):
-        counter = 0
-        for char in answer:
-            counter += self.sak.letter_dict[char][1]
-        return  counter
+
 
     def player_pass(self,player,answer):
         if answer == 'p':
@@ -112,7 +129,7 @@ class Game:
 
             self.player_pass(self.human_1, answer)
             if self.check_given_answer(self.human_1, answer):
-                self.human_1.add_score(self.count_answer_points(answer))
+                self.human_1.add_score(count_answer_points(answer))
                 print(self.human_1.score)
             self.sak.getletters(7-len(self.com_1.hand),self.com_1)
             print(repr(self.sak))
@@ -122,7 +139,7 @@ class Game:
                 self.player_pass(self.com_1, 'p')
                 print(self.com_1.name+" passed !")
             else:
-                self.com_1.add_score(self.count_answer_points(answer_com))
+                self.com_1.add_score(count_answer_points(answer_com))
                 print(self.com_1.name+" answered "+answer_com+ " and has "+ str(self.com_1.score)+"pts")
         self.save_scores()
 
@@ -133,6 +150,13 @@ class Game:
             for game in data:
                 print(game)
                 print(data[game])
+
+    @classmethod
+    def count_answer_points(cls, answer):
+        counter = 0
+        for char in answer:
+            counter += SakClass.letter_dict[char][1]
+        return counter
 
 
 
