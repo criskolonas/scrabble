@@ -23,22 +23,28 @@ class Computer(Player) :
                         if perm.strip() == valid.strip():
                             return perm
         if self.mode == 'max':
-            for i in range(7, 2):
+            for i in reversed(range(2, 7)):
                 perms=list(map("".join, permutations(self.hand,i)))
+                print(perms)
                 for perm in perms:
                     for valid in valid_words:
                         if perm.strip() == valid.strip():
                             return perm
         if self.mode == 'smart':
+
             max_pts=0
             best_word= None
-            perms = list(map("".join, permutations(self.hand, i)))
-            for perm in perms:
-                pts = Game.count_answer_points(perm)
-                if pts > max:
-                    max = pts
-                    best_word = perm
-
+            for i in range(2,7):
+                perms = list(map("".join, permutations(self.hand, i)))
+                for valid in valid_words:
+                    for perm in perms:
+                        if perm.strip() == valid.strip():
+                            pts = Game.count_answer_points(perm)
+                            if pts > max_pts:
+                                max_pts = pts
+                                best_word = perm
+            if best_word is not None:
+                return best_word
         return "none"
 
 
@@ -89,16 +95,19 @@ class Game:
             outf.seek(0)
             json.dump(data, outf)
 
-    def check_given_answer(self,player,answer):
-        #copy of player's hand
+    def remove_used_letters(self,player,answer):
         hand = copy(player.hand)
-        #ready to remove used letters if answer is correct
+        # ready to remove used letters if answer is correct
         for char in answer:
             once = False
             for letter in player.hand:
                 if char == letter and once == False:
                     hand.remove(letter)
-                    once=True
+                    once = True
+        player.hand = copy(hand)
+
+    def check_given_answer(self,player,answer):
+
         #creates all string permutations of current hand
         all_perms = list(map("".join, permutations(player.hand)))
         #checks if the answer is a substring of any of the string permutations in hand
@@ -107,8 +116,6 @@ class Game:
                 #checks if answer exists in valid words
                 for word in self.valid_words:
                     if word.strip() == answer.strip():
-                        player.hand = copy(hand)
-                        print('true')
                         return True
         return False
 
@@ -122,6 +129,7 @@ class Game:
     def run(self):
         answer = None
         while answer != 'q' :
+            #Human
             self.sak.getletters(7-len(self.human_1.hand), self.human_1)
             print(repr(self.sak))
             self.show_available_letters(self.human_1)
@@ -129,8 +137,10 @@ class Game:
 
             self.player_pass(self.human_1, answer)
             if self.check_given_answer(self.human_1, answer):
-                self.human_1.add_score(count_answer_points(answer))
+                self.human_1.add_score(self.count_answer_points(answer))
+                self.remove_used_letters(self.human_1,answer)
                 print(self.human_1.score)
+            #Computer
             self.sak.getletters(7-len(self.com_1.hand),self.com_1)
             print(repr(self.sak))
             self.show_available_letters(self.com_1)
@@ -139,8 +149,11 @@ class Game:
                 self.player_pass(self.com_1, 'p')
                 print(self.com_1.name+" passed !")
             else:
-                self.com_1.add_score(count_answer_points(answer_com))
+                self.com_1.add_score(self.count_answer_points(answer_com))
                 print(self.com_1.name+" answered "+answer_com+ " and has "+ str(self.com_1.score)+"pts")
+                self.remove_used_letters(self.com_1,answer_com)
+                self.sak.getletters(7 - len(self.com_1.hand), self.com_1)
+
         self.save_scores()
 
     @classmethod
