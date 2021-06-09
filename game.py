@@ -1,13 +1,60 @@
 from copy import copy
 from os.path import exists
 from time import strftime
-from Player import Player
-
-from Human import Human
-from SakClass import SakClass
+from random import shuffle
+from abc import ABC,abstractmethod
 from itertools import permutations
 import json
 
+
+
+class SakClass:
+    letter_dict = {'Α': [12, 1], 'Β': [1, 8], 'Γ': [2, 4], 'Δ': [2, 4], 'Ε': [8, 1],
+                   'Ζ': [1, 10], 'Η': [7, 1], 'Θ': [1, 10], 'Ι': [8, 1], 'Κ': [4, 2],
+                   'Λ': [3, 3], 'Μ': [3, 3], 'Ν': [6, 1], 'Ξ': [1, 10], 'Ο': [9, 1],
+                   'Π': [4, 2], 'Ρ': [5, 2], 'Σ': [7, 1], 'Τ': [8, 1], 'Υ': [4, 2],
+                   'Φ': [1, 8], 'Χ': [1, 8], 'Ψ': [1, 10], 'Ω': [3, 3]}
+    def __init__(self):
+        self.sak = []
+        self.make_sak()
+
+    def __repr__(self):
+        return repr('Στο σακουλάκι γράμματα:' + str(len(self.sak)))
+
+    #calls random.shuffle to shuffle letters in the sak
+    def randomize_sak(self):
+        shuffle(self.sak)
+
+    #adds all the letters and their duplicates in a list
+    def make_sak(self):
+        for letter in self.letter_dict:
+            for i in range(self.letter_dict[letter][0]):
+                self.sak.append(letter)
+
+
+    def putbackletters(self,player):
+        for letter in player.hand:
+            self.sak.append(letter)
+        player.hand.clear()
+
+    def getletters(self,n,player):
+        if len(self.sak) >= n:
+            self.randomize_sak()
+            for i in range(n):
+                player.hand.append(self.sak.pop())
+
+class Player(ABC):
+    def __init__(self,name):
+        self.score=0
+        self.name = name
+        self.hand = []
+
+    @abstractmethod
+    def play(self):
+        pass
+
+    def add_score(self,pts):
+        self.score = self.score + pts
 
 class Computer(Player) :
     def __init__(self,name,mode):
@@ -134,12 +181,13 @@ class Game:
             print(repr(self.sak))
             self.show_available_letters(self.human_1)
             answer = self.human_1.play()
-
             self.player_pass(self.human_1, answer)
             if self.check_given_answer(self.human_1, answer):
-                self.human_1.add_score(self.count_answer_points(answer))
+                pts = self.count_answer_points(answer)
+                self.human_1.add_score(pts)
                 self.remove_used_letters(self.human_1,answer)
-                print(self.human_1.score)
+                print('Αποδεκτή Λέξη:'+answer+' Πόντοι:'+str(pts)+' Σύνολο:'+str(self.human_1.score))
+            input('Enter για συνεχεια')
             #Computer
             self.sak.getletters(7-len(self.com_1.hand),self.com_1)
             print(repr(self.sak))
@@ -149,9 +197,12 @@ class Game:
                 self.player_pass(self.com_1, 'p')
                 print(self.com_1.name+" passed !")
             else:
-                self.com_1.add_score(self.count_answer_points(answer_com))
+                pts_com = self.count_answer_points(answer_com)
+                self.com_1.add_score(pts_com)
                 print(self.com_1.name+" answered "+answer_com+ " and has "+ str(self.com_1.score)+"pts")
                 self.remove_used_letters(self.com_1,answer_com)
+                print('Αποδεκτή Λέξη:'+answer_com+' Πόντοι:'+str(pts_com)+' Σύνολο:'+str(self.com_1.score))
+
                 self.sak.getletters(7 - len(self.com_1.hand), self.com_1)
 
         self.save_scores()
@@ -172,6 +223,13 @@ class Game:
         return counter
 
 
+class Human(Player):
+    def __init__(self,name):
+        super(Human,self).__init__(name)
+
+    def play(self):
+        answer = input('Λέξη:')
+        return answer
 
 
 
