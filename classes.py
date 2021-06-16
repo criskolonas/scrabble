@@ -229,7 +229,6 @@ class Game:
     # plays out a game
     def run(self):
         check = True
-        # DES EDW POUTANA!!! CHECKARE TIS SINTHIKES TERMATISMOU DEN NOMIZW NA NAI 100% SWSTES
         while len(self.sak.sak) >= 7 and check:
             # Human
             self.sak.getletters(7 - len(self.human_1.hand), self.human_1)
