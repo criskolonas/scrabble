@@ -43,9 +43,27 @@ class Main(object):
             Main.show_menu(self)
             Main.player_input(self)
 
+
+class A:
+    def __init__(self):
+        print("a")
+    def message(self):
+        print ("a")
+
+class A2:
+    pass
+class B(A):
+    def message(self):
+        print("b")
+class C(A2,B):
+    pass
+
+
 if __name__ == '__main__':
-    main = Main()
-    main.show_menu()
-    main.player_input()
+    #main = Main()
+    #main.show_menu()
+    #main.player_input()
 
-
+    c = C()
+    print(in)
+    c.message()
