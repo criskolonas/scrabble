@@ -249,7 +249,6 @@ class Game:
                 print('Αποδεκτή Λέξη:' + answer + ' Πόντοι:' + str(pts) + ' Σύνολο:' + str(self.human_1.score))
             elif answer != 'p' and not(self.check_given_answer(self.human_1, answer)):
                 print("Μη αποδεκτή λέξη! Σειρά του {}".format(self.com_1.name))
-            # input('Enter για συνεχεια')
             # Computer
             self.sak.getletters(7 - len(self.com_1.hand), self.com_1)
             print(repr(self.sak))
